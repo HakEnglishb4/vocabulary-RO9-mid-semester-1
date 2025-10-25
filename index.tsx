@@ -389,35 +389,54 @@ const WrongAnswersModal = ({ isOpen, onClose, mistakes, onPracticeMistakes }) =>
           : React.createElement(
               "ul",
               { className: "divide-y divide-gray-200" },
-              mistakes.map((mistake, index) => {
-// FIX: Refactored to build an array of children explicitly. This helps avoid subtle TypeScript type inference issues when passing conditional render expressions directly as arguments to `React.createElement`.
-                const children = [
-                  React.createElement(
-                    "div",
-                    { key: "word", className: "flex justify-between items-center w-full" },
-                    React.createElement("span", { className: "text-lg text-gray-800 font-medium" }, mistake.word.english),
-                    React.createElement("span", { className: "text-gray-600" }, mistake.word.vietnamese)
-                  )
-                ];
-
-                if (mistake.sentenceErrorCount > 0) {
-                  children.push(React.createElement("p", { key: "sentence-error", className: "text-sm font-semibold text-red-600 mt-1" }, `Sentence mistakes: ${mistake.sentenceErrorCount}`));
-                }
-
-                if (mistake.word.englishExample) {
-                  children.push(React.createElement("p", { key: "example", className: "text-xl text-gray-500 mt-1 italic" }, `e.g., "${mistake.word.englishExample}"`));
-                }
-
-                return React.createElement(
+// FIX: Replaced the previous implementation which used an explicit `children` array and spread operator with a more direct approach using ternary operators for conditional rendering. This resolves a subtle TypeScript type inference issue.
+              mistakes.map((mistake, index) =>
+                React.createElement(
                   "li",
                   {
                     key: index,
                     className: "py-4 flex flex-col items-start select-none",
-                    onContextMenu: (e) => e.preventDefault()
+                    onContextMenu: (e) => e.preventDefault(),
                   },
-                  ...children
-                );
-              })
+                  React.createElement(
+                    "div",
+                    {
+                      key: "word",
+                      className: "flex justify-between items-center w-full",
+                    },
+                    React.createElement(
+                      "span",
+                      { className: "text-lg text-gray-800 font-medium" },
+                      mistake.word.english
+                    ),
+                    React.createElement(
+                      "span",
+                      { className: "text-gray-600" },
+                      mistake.word.vietnamese
+                    )
+                  ),
+                  mistake.sentenceErrorCount > 0
+                    ? React.createElement(
+                        "p",
+                        {
+                          key: "sentence-error",
+                          className: "text-sm font-semibold text-red-600 mt-1",
+                        },
+                        `Sentence mistakes: ${mistake.sentenceErrorCount}`
+                      )
+                    : null,
+                  mistake.word.englishExample
+                    ? React.createElement(
+                        "p",
+                        {
+                          key: "example",
+                          className: "text-xl text-gray-500 mt-1 italic",
+                        },
+                        `e.g., "${mistake.word.englishExample}"`
+                      )
+                    : null
+                )
+              )
             )
       ),
       React.createElement(
@@ -731,14 +750,11 @@ const Game = ({ topic, onReturnToMenu, onNextTopic, onStartPractice }) => {
             React.createElement("p", { className: "text-sky-700 font-mono whitespace-nowrap" }, gameStage === 'word' ? currentWord.english : currentWord.englishExample)
           )
         ),
-// FIX: Refactored to use a more explicit conditional structure. This resolves a subtle type inference issue in TypeScript by ensuring the children passed to `createElement` are always clearly defined React nodes.
-        feedback &&
-          React.createElement(
-            "div",
-            { className: "text-center" },
-            React.createElement(
-              React.Fragment,
-              null,
+// FIX: Replaced conditional rendering with `&&` to a ternary operator `? :` to resolve a TypeScript type inference issue. Also removed a redundant React.Fragment.
+        feedback
+          ? React.createElement(
+              "div",
+              { className: "text-center" },
               React.createElement(
                 "p",
                 {
@@ -758,7 +774,7 @@ const Game = ({ topic, onReturnToMenu, onNextTopic, onStartPractice }) => {
                   )
                 : null
             )
-          )
+          : null
       )
     ),
     React.createElement(WrongAnswersModal, { 
